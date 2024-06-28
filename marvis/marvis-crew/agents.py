@@ -1,6 +1,5 @@
 from textwrap import dedent
 from crewai import Agent
-from tools import WindowsExpertTools
 
 
 class MarvisAgents:
@@ -14,6 +13,7 @@ class MarvisAgents:
         )
 
     def _goal_enhancer(self):
+        from tools import WindowsExpertTools
         return Agent(
             role='Windows AI Goal Enhancer',
             goal='Analyze the received goal that has to be accomplished using Windows.',
