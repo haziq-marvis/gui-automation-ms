@@ -14,3 +14,7 @@ class MarvisTasks():
 			    Your Final answer must be the full python code, only the python code and nothing else."""),
             agent=agent
         )
+
+    def execute_enhanced_goal_task(self, task, goal, focused_app):
+        enhanced_goal_statement = task.agent.tools['get_enhanced_goal_statement'](goal, focused_app)
+        return enhanced_goal_statement['choices'][0]['message']['content']
