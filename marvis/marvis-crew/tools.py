@@ -49,7 +49,7 @@ class WindowsExpertTools:
         return app_name
 
     @tool("Return the enhanced goal based on current state of the system")
-    def get_enhanced_goal_statement(self, goal, focused_app):
+    def get_enhanced_goal_statement1(self, goal, focused_app):
         screenshot = get_screen_image(focused_app, additional_context=None, x=None, y=None, screenshot_size="Full Screen")
 
         additional_context = (
