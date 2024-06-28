@@ -2,6 +2,12 @@ import psutil
 import win32process
 import win32gui
 from .core_imaging import focus_window, capture_screenshot, encode_image
+import requests
+from PIL import Image
+import pyautogui
+import io
+api_key = "TO BE DEFINED LATER"
+
 
 def get_focused_window_details():
     try:
@@ -68,3 +74,36 @@ def get_screen_image(window_title=None, additional_context=None, x=None, y=None,
     # Convert the bytes to a base64-encoded image and analyze
     base64_image = encode_image(bytes_data)
     return base64_image
+
+
+def analyze_screenshot(screenshot, prompt):
+
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
+
+    payload = {
+        "model": "gpt-4-vision-preview",
+        "messages": [
+            {
+                "role": "assistant",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": f"{prompt}"
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/png;base64,{screenshot}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 300
+    }
+
+    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+    return response.json()

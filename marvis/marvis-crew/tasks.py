@@ -14,12 +14,3 @@ class MarvisTasks():
 			    Your Final answer must be the full python code, only the python code and nothing else."""),
             agent=agent
         )
-
-    def _get_enhanced_goal_statement(self, agent, goal, focused_app):
-        return Task(
-            description=dedent(
-                f"""You will receive a goal which has to be accomplished using Windows. Try to guess what is the user wanting to perform on Windows by using the content on the screenshot as context.\nRespond an improved goal statement tailored for Windows applications by analyzing the current status of the system and the next steps to perform. Be direct and concise, do not use pronouns.\nBase on the elements from the screenshot reply the current status of the system and specify it in detail.
-                Focused application: {focused_app}\nGoal: {goal}"""
-            ),
-            agent=agent
-        )
