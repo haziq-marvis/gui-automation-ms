@@ -1,5 +1,6 @@
 from textwrap import dedent
 from crewai import Agent
+from tools import WindowsExpertTools
 
 
 class MarvisAgents:
@@ -18,7 +19,8 @@ class MarvisAgents:
             goal='Analyze the received goal that has to be accomplished using Windows.',
             backstory=dedent("""Respond an improved goal statement tailored for Windows applications."""),
             allow_delegation=False,
-            verbose=True
+            verbose=True,
+            tools = {'get_enhanced_goal_statement': WindowsExpertTools.get_enhanced_goal_statement1}
         )
 
     def _screenshot_analyzer(self):
