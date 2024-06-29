@@ -4,12 +4,12 @@ import base64
 import requests
 import io
 from PIL import Image
-
+import os
 # Assuming that the `activate_window_title` function is defined in another module correctly
 from .window_focus import activate_windowt_title
 
 # OpenAI API Key
-api_key = 'insert_your_api_key_here'
+api_key =  os.getenv("OPENAI_API_KEY")
 
 
 # Function to focus a window given its title

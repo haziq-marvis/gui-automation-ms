@@ -2,40 +2,68 @@ from textwrap import dedent
 from typing import ClassVar
 from agents import MarvisAgents
 from crewai import Task
-from tools import get_enhanced_goal_statement
-from pydantic import BaseModel, Field
+from crewai.task import TaskOutput
+from utils.window_focus import activate_windowt_title
+from tools.get_app_title import process_app_title_result
 
-
-class CustomToolTask(Task):
-    user_input: str = Field(default="")
-    focused_app: str = Field(default="")
-    custom_tool: any = Field(default=None)
-    def run(self):
-        print("testing run")
-        result = self.agent.use_tool(self.custom_tool, user_input=self.user_input, focused_app=self.focused_app)
+def post_app_title(output: TaskOutput):
+    target_app = output.raw_output
+    print("Opening given window", target_app)
+    print("applying additional logic")
+    target_app = process_app_title_result(target_app)
+    print("Opening app")
+    activate_windowt_title(target_app)
+    output.raw_output = target_app
 
 class MarvisTasks():
-    def _get_app_title_task(self, agent, goal, programs_list, installed_app_registry, focused_app=None):
+    def get_app_title_task(self, agent, user_requirements, programs_list, installed_app_registry, focused_app=None):
         return Task(
-            description=dedent(f"""You will receive a list of programs and responds only respond with the
-                 best match program of the goal. Only respond with the window name or the program name. 
+            description=dedent(f"""
+            **Task**: Return relevant application to perform user_requirements
+            **Description**: You will receive a list of programs and responds only respond with the
+                 best match program of the goal. Only respond with the exact window name or the program name. 
                  For search engines and social networks use Firefox or Chrome.\n
                  Open programs:\n{programs_list}\n
-                 Goal: {goal}\n
-                 focused_app: {focused_app}
+                 User's End Goal: {user_requirements}\n
                 All installed programs:\n{installed_app_registry}\n
-			    Your Final answer must be the full python code, only the python code and nothing else."""),
+                
+            **Parameters**: 
+            - user_requirements: {user_requirements}
+
+            **Note**:
+            Only choose an open window name or installed apps if not open already from the given option, do not suggest anything else. You ll get 100$ for correct answer."""),
             agent=agent,
-            expected_output="title of installed application or window."
+            expected_output="target_app: Title of installed application or open window that can be used to perform user requirements",
+            callback=post_app_title
         )
 
-    def enhanced_goal_task(self, agent, user_requirement, focused_app):
+    def enhanced_goal_task(self, agent, user_requirement, target_app):
         return Task(
-            # user_input=user_input,
-            # focused_app=focused_app,
-            # custom_tool=get_enhanced_goal_statement,
-            description=dedent(f"""An expert Windows User who can take a look at given screen and a goal using tool and return enhanced goalaccording to user_requirements: {user_requirement} and focused_app: {focused_app}."""),
-            expected_output=f"Enhanced goal statements according to user_requirements: {user_requirement} and focused_app: {focused_app}",
+            description=dedent(f"""An efficient assistant who has access to a tool that can analyze screen and give enhanced goal 'get_enhanced_goal_statement_tool', you use the tool to share enhanced goal on the user_requirements: {user_requirement} and target_app: {target_app}
+    
+            **Parameters**: 
+            - user_requirements: {user_requirement}
+            - target_app: {target_app}
+            **Note**:
+            Only choose an open window name or installed apps if not open already from the given option, do not suggest anything else. You ll get 100$ for correct answer.
+            """),
+            expected_output=f"Enhanced goal statement according to user_requirements: {user_requirement} and target_app: {target_app} using tools.",
+            agent=agent
+        )
+
+    def detailed_steps_creator(self, agent, user_requirement, target_app, detailed_requirements):
+        return Task(
+            description=dedent(
+                f"""An efficient assistant who has access to a tool that can take detailed requirements 'create_step_tool', you use the tool to create detailed json with the natural language steps to achieve the goal.
+
+            **Parameters**: 
+            - user_requirements: {user_requirement}
+            - target_app: {target_app}
+            - detailed_requirements: {detailed_requirements}
+            **Note**:
+            Share all the detailed steps back with me, do not remove anything. You ll get 100$ for complete answer.
+            """),
+            expected_output=f"Response from the utility form of a json to achieve the goal.The json must include only an act and its step, should be in the format created by the tool.",
             agent=agent
         )
 

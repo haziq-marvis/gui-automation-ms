@@ -6,7 +6,9 @@ import requests
 from PIL import Image
 import pyautogui
 import io
-api_key = "TO BE DEFINED LATER"
+import os
+
+api_key = os.getenv("OPENAI_API_KEY")
 
 
 def get_focused_window_details():
@@ -49,7 +51,7 @@ def get_screen_image(window_title=None, additional_context=None, x=None, y=None,
     screenshot = capture_screenshot(window, region)
 
     # Optionally, paste the cursor onto the screenshot, adjusting for the offset if a region is specified
-    cursor_img_path = r'media\Mouse_pointer_small.png'
+    cursor_img_path = r'C:\Users\Grayphite\codebase\gui-automation-ms\core\media\Mouse_pointer_small.png'
     with Image.open(cursor_img_path) as cursor:
         cursor = cursor.convert("RGBA")  # Ensure cursor image has an alpha channel for transparency
 
@@ -80,14 +82,14 @@ def analyze_screenshot(screenshot, prompt):
 
     headers = {
         "Content-Type": "application/json",
-        "Authorization": f"Bearer {api_key}"
+        "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
     }
 
     payload = {
-        "model": "gpt-4-vision-preview",
+        "model": "gpt-4o",
         "messages": [
             {
-                "role": "assistant",
+                "role": "user",
                 "content": [
                     {
                         "type": "text",
@@ -106,4 +108,4 @@ def analyze_screenshot(screenshot, prompt):
     }
 
     response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    return response.json()
+    return response.json()['choices'][0]['message']['content']

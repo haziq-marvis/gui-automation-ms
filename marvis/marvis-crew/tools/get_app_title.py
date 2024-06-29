@@ -27,11 +27,11 @@ class GetAppTitleBaseTool:
         {parser.get_format_instructions()}
         """
 
-        def parse_input_and_delegate(user_requirements: str, focused_app: str) -> Any:
+        def parse_input_and_delegate(user_requirements: str) -> Any:
             """Parse the input and delegate to the function."""
             try:
                 parsed = parser.invoke(
-                    '{' + f'"user_requirements": "{user_requirements}", "focused_app": "{focused_app}"' + '}')
+                    '{' + f'"user_requirements": "{user_requirements}"' + '}')
             except Exception as e:
                 return f"Could not parse input: {str(e)}"
             return func(parsed)
@@ -50,10 +50,9 @@ class ValidateAppTitleParams(BaseModel):
     """Input for reading a post"""
 
     user_requirements: str = Field(description="requirement of the end user")
-    focused_app: str = Field(description="Current focused app")
 
 
-def util_get_relevant_app_title(user_requirement, focused_app):
+def util_get_relevant_app_title(user_requirement, focused_app=None):
     """Function to get relevant application title against a goal."""
     print("Inside util_get_relevant_app_title")
     print("user_requirement", user_requirement)
@@ -61,23 +60,22 @@ def util_get_relevant_app_title(user_requirement, focused_app):
     all_program_list = last_programs_list(focus_last_window=focused_app)
     installed_app_registry = get_installed_apps_registry()
 
-    from agents import MarvisAgents
-    Agents = MarvisAgents()
-    app_selector_agent = Agents._app_selector()
+    # from agents import MarvisAgents
+    # Agents = MarvisAgents()
+    # app_selector_agent = Agents._app_selector()
+    #
+    # task = Task(
+    #     description=dedent(f"""You will receive a list of programs and responds only respond with the
+    #                  best match program of the goal. Only respond with the window name or the program name.
+    #                  For search engines and social networks use Firefox or Chrome.\n
+    #                  Open programs:\n{all_program_list}\n
+    #                  Goal: {user_requirement}\n
+    #                 All installed programs:\n{installed_app_registry}\n"""),
+    #     agent=app_selector_agent
+    # )
+    # result = task.execute()  # TODO: analyze the result and parse
 
-    task = Task(
-        description=dedent(f"""You will receive a list of programs and responds only respond with the
-                     best match program of the goal. Only respond with the window name or the program name. 
-                     For search engines and social networks use Firefox or Chrome.\n
-                     Open programs:\n{all_program_list}\n
-                     Goal: {user_requirement}\n
-                    All installed programs:\n{installed_app_registry}\n
-                    Your Final answer must be the full python code, only the python code and nothing else."""),
-        agent=app_selector_agent
-    )
-    result = task.execute()  # TODO: analyze the result and parse
-
-    app_name = result
+    app_name = "test"
     """Follow all the processes required to find related app  title"""
     filtered_matches = re.findall(r'["\'](.*?)["\']', app_name)
     if filtered_matches and filtered_matches[0]:
@@ -97,6 +95,23 @@ def util_get_relevant_app_title(user_requirement, focused_app):
 get_app_title_tool = GetAppTitleBaseTool().from_function(
     util_get_relevant_app_title,
     "util_get_relevant_app_title",
-    "Tool that return releavnt app title based on user requirements and focused app",
+    "Tool that return relevant app title based on user requirements.",
     args_schema=ValidateAppTitleParams,
 )
+
+
+def process_app_title_result(app_name):
+    """Follow all the processes required to find related app  title"""
+    filtered_matches = re.findall(r'["\'](.*?)["\']', app_name)
+    if filtered_matches and filtered_matches[0]:
+        app_name = filtered_matches[0]
+        print(app_name)
+    if "command prompt" in app_name.lower():
+        app_name = "cmd"
+    elif "calculator" in app_name.lower():
+        app_name = "calc"
+    elif "sorry" in app_name:
+        app_name = get_focused_window_details()[3].strip('.exe')
+        print(f"Using the focused window \"{app_name}\" for context.")
+        # speaker(f"Using the focused window \"{app_name}\" for context.")
+    return app_name

@@ -281,8 +281,8 @@ def activate_windowt_title(application_name):
 
 
 
-if __name__ == "__main__":
-    # active_title = activate_windowt_title("chrome")
-    active_title = activate_windowt_title("Google Chrome")
-    print(f"Active window title: {active_title}")
+# if __name__ == "__main__":
+#     # active_title = activate_windowt_title("chrome")
+#     active_title = activate_windowt_title("Google Chrome")
+#     print(f"Active window title: {active_title}")
 
