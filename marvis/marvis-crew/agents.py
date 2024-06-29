@@ -1,6 +1,7 @@
 from textwrap import dedent
 from crewai import Agent
-from tools import get_enhanced_goal_statement
+from tools.get_enhanced_goal_statement import get_enhanced_goal_statement_tool
+from tools.get_app_title import get_app_title_tool
 
 
 class MarvisAgents:
@@ -10,6 +11,7 @@ class MarvisAgents:
             goal='Figure out the application title or windows title',
             backstory=dedent("""You are an Expert windows user working as assistant called App Selector that receives a list of programs and responds only respond with the best match."""),
             allow_delegation=False,
+            tools=[get_app_title_tool],
             verbose=True
         )
 
@@ -19,7 +21,7 @@ class MarvisAgents:
             goal='Analyze the received user requirements that has to be accomplished using Windows OS.',
             backstory=dedent("""Respond an improved user requirement statement tailored for Windows OS applications."""),
             allow_delegation=False,
-            tools=[get_enhanced_goal_statement],
+            tools=[get_enhanced_goal_statement_tool],
             verbose=True
         )
 
