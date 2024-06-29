@@ -17,34 +17,27 @@ def main():
     from crewai import Task, Crew
 
     enhanceUserRequirementsTask = Task(
-        # parameters={
-        #     'user_requirements': user_requirements,
-        #     'focused_app': "Firefox"
-        # },
-        context=
-        {
+        config={
             'user_requirements': user_requirements,
-            'focused_app': "Google Chrome",
-            # 'expected_output': "Detailed user requirements",
-            # 'description': "Enhance the user requirements for the given windows system application"
-        }
-        ,
+            'focused_app': "Firefox"
+        },
         tools=[get_enhanced_goal_statement],
         description=dedent(
-            f"""An expert Windows OS User who can take a look at given screen and a user requirements using tool and return enhanced user requirements."""),
-        expected_output="User Enhance Requirements",
-        agent=agents._goal_enhancer
+            """An expert Windows OS User who can take a look at the given screen and user requirements using the tool and return enhanced user requirements."""),
+        expected_output="User Enhanced Requirements",
+        agent=agents._goal_enhancer()
     )
 
-    # res = enhanceUserRequirementsTask.execute()
-    # print("Improved Goal Statement:", res)
+    res = enhanceUserRequirementsTask.execute()
+    print("Improved Goal Statement:", res)
 
-    # Create a crew and assign the task
-    crew = Crew(agents=[agents._goal_enhancer], tasks=[enhanceUserRequirementsTask])
 
-    # Execute the crew
-    result = crew.kickoff()
-    print(result)
+    # # Create a crew and assign the task
+    # crew = Crew(agents=[agents._goal_enhancer], tasks=[enhanceUserRequirementsTask])
+    #
+    # # Execute the crew
+    # result = crew.kickoff()
+    # print(result)
 
 
 if __name__ == "__main__":
