@@ -1,39 +1,51 @@
-from utils.window_focus import activate_windowt_title, get_installed_apps_registry, get_open_windows
 from agents import MarvisAgents
 from tasks import MarvisTasks
 from dotenv import load_dotenv
+from textwrap import dedent
+from tools import get_enhanced_goal_statement
 import os
+
 load_dotenv()
 
-openai_api_key=os.getenv("OPENAI_API_KEY")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
 
 def main():
-    idea = input("# Describe what you want Marvis to do:\n\n")
-
+    user_requirements = input("# Describe what you want Marvis to do:\n\n")
     agents = MarvisAgents()
-    tasks = MarvisTasks()
+    # tasks = MarvisTasks()
+    from crewai import Task, Crew
 
-    # focus_window = activate_windowt_title(idea)
-    # programs_list = get_open_windows()
-    # installed_app_registry = get_installed_apps_registry()
+    enhanceUserRequirementsTask = Task(
+        # parameters={
+        #     'user_requirements': user_requirements,
+        #     'focused_app': "Firefox"
+        # },
+        context=
+        {
+            'user_requirements': user_requirements,
+            'focused_app': "Google Chrome",
+            # 'expected_output': "Detailed user requirements",
+            # 'description': "Enhance the user requirements for the given windows system application"
+        }
+        ,
+        tools=[get_enhanced_goal_statement],
+        description=dedent(
+            f"""An expert Windows OS User who can take a look at given screen and a user requirements using tool and return enhanced user requirements."""),
+        expected_output="User Enhance Requirements",
+        agent=agents._goal_enhancer
+    )
 
-    # app_selector_agent = agents._app_selector()
-    # app_title_task = tasks._get_app_title_task(app_selector_agent, idea, focus_window, programs_list, installed_app_registry)
-    # app_title = app_title_task.execute()
-    # focus_window="chrome"
-    # goal_enhancer_agent = agents._goal_enhancer()
-    # enhanced_goal_task = tasks._get_enhanced_goal_statement(goal_enhancer_agent, idea, focus_window)
-    # enhanced_goal = enhanced_goal_task.execute()
+    # res = enhanceUserRequirementsTask.execute()
+    # print("Improved Goal Statement:", res)
 
-    focus_window = "chrome"
-    goal_enhancer_agent = agents._goal_enhancer()
-    enhanced_goal_task = tasks._get_enhanced_goal_statement(goal_enhancer_agent, idea, focus_window)
-    enhanced_goal = tasks.execute_enhanced_goal_task(enhanced_goal_task, idea, focus_window)
-    print("Improved Goal Statement:", enhanced_goal)
+    # Create a crew and assign the task
+    crew = Crew(agents=[agents._goal_enhancer], tasks=[enhanceUserRequirementsTask])
 
+    # Execute the crew
+    result = crew.kickoff()
+    print(result)
 
-    # print(f"AI Analyzing: {app_title}")
-    # print(f"Enhanced Goal: {enhanced_goal}")
 
 if __name__ == "__main__":
     main()

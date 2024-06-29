@@ -33,7 +33,7 @@ def get_screen_image(window_title=None, additional_context=None, x=None, y=None,
         # We don't need window focus or a specific region for a full-screen screenshot.
         pass
     elif window_title:  # If a window title is provided, focus on the window.
-        window = focus_window(window_title, screenshot_size='Full screen')
+        window = focus_window(window_title)
         if not window:
             return None  # If no window is found, exit the function.
         if screenshot_size and type(screenshot_size) == tuple and x is not None and y is not None:
