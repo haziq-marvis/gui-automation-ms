@@ -22,13 +22,16 @@ def main():
 
     # define tasks
 
-    get_app_title_task = tasks._get_app_title_task(get_relevant_app_title_agent, user_requirements)
-    enhanced_goal_task = tasks.enhanced_goal_task(get_enhanced_goal_agent, user_requirements)
+    get_app_title_task = tasks._get_app_title_task(get_relevant_app_title_agent, user_requirements, [], [], focused_app="Google Chrome")
+    enhanced_goal_task = tasks.enhanced_goal_task(get_enhanced_goal_agent, user_requirements, focused_app="Google Chrome")
 
     crew = Crew(
-        agents=[get_relevant_app_title_agent, get_enhanced_goal_agent],
+        agents=[
+            # get_relevant_app_title_agent,
+            get_enhanced_goal_agent
+        ],
         tasks=[
-            get_app_title_task,
+            # get_app_title_task,
             enhanced_goal_task
         ]
     )
@@ -46,7 +49,7 @@ def main():
     #     agent=agents._goal_enhancer()
     # )
 
-    print("Improved Goal Statement:", res)
+    print("End:")
 
 
     # # Create a crew and assign the task

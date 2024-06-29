@@ -53,8 +53,11 @@ class ValidateAppTitleParams(BaseModel):
     focused_app: str = Field(description="Current focused app")
 
 
-def util_get_relevant_app_title(user_requirement, focused_app=True):
+def util_get_relevant_app_title(user_requirement, focused_app):
     """Function to get relevant application title against a goal."""
+    print("Inside util_get_relevant_app_title")
+    print("user_requirement", user_requirement)
+    print("focused_app", focused_app)
     all_program_list = last_programs_list(focus_last_window=focused_app)
     installed_app_registry = get_installed_apps_registry()
 
