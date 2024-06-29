@@ -15,7 +15,7 @@ class CustomToolTask(Task):
         result = self.agent.use_tool(self.custom_tool, user_input=self.user_input, focused_app=self.focused_app)
 
 class MarvisTasks():
-    def _get_app_title_task(self, agent, goal, focus_window, programs_list, installed_app_registry):
+    def _get_app_title_task(self, agent, goal, programs_list, installed_app_registry):
         return Task(
             description=dedent(f"""You will receive a list of programs and responds only respond with the
                  best match program of the goal. Only respond with the window name or the program name. 
@@ -27,13 +27,13 @@ class MarvisTasks():
             agent=agent
         )
 
-    def enhanced_goal_task(self, agent, user_input, focused_app):
-        return CustomToolTask(
-            user_input=user_input,
-            focused_app=focused_app,
-            custom_tool=get_enhanced_goal_statement,
+    def enhanced_goal_task(self, agent):
+        return Task(
+            # user_input=user_input,
+            # focused_app=focused_app,
+            # custom_tool=get_enhanced_goal_statement,
             description=dedent(f"""An expert Windows User who can take a look at given screen and a goal using tool and return enhanced goal."""),
-            expected_output="Enhanced goal",
+            expected_output="Enhanced goal statements.",
             agent=agent
         )
 
