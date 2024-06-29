@@ -17,27 +17,39 @@ def main():
     from crewai import Task, Crew
 
     enhanceUserRequirementsTask = Task(
-        config={
-            'user_requirements': user_requirements,
-            'focused_app': "Firefox"
-        },
+        # config={
+        #     'user_requirements': user_requirements,
+        #     'focused_app': "Firefox"
+        # },
         tools=[get_enhanced_goal_statement],
         description=dedent(
-            """An expert Windows OS User who can take a look at the given screen and user requirements using the tool and return enhanced user requirements."""),
+            f"""
+            **Task**: {user_requirements}
+            **Description**: Based on user requirements and focused app enhance user requirements
+
+            **Parameters**: 
+            - user_requirements: {user_requirements}
+            - focused_app: select a relevant windows application for {user_requirements}
+
+        """
+        ),
         expected_output="User Enhanced Requirements",
         agent=agents._goal_enhancer()
     )
 
-    res = enhanceUserRequirementsTask.execute()
-    print("Improved Goal Statement:", res)
+    # res = enhanceUserRequirementsTask.execute()
+    # print("Improved Goal Statement:", res)
 
+    # Create a crew and assign the task
+    crew = Crew(
+        agents=[agents._goal_enhancer()],
+        tasks=[enhanceUserRequirementsTask],
+        verbose=True
+    )
 
-    # # Create a crew and assign the task
-    # crew = Crew(agents=[agents._goal_enhancer], tasks=[enhanceUserRequirementsTask])
-    #
-    # # Execute the crew
-    # result = crew.kickoff()
-    # print(result)
+    # Execute the crew
+    result = crew.kickoff()
+    print(result)
 
 
 if __name__ == "__main__":
