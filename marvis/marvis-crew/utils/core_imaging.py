@@ -9,7 +9,7 @@ import os
 from .window_focus import activate_windowt_title
 
 # OpenAI API Key
-api_key =  os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY")
 
 
 # Function to focus a window given its title
@@ -51,10 +51,10 @@ def analyze_image(base64_image, window_title, additional_context='What’s in th
     }
 
     payload = {
-        "model": "gpt-4-vision-preview",
+        "model": "gpt-4o",
         "messages": [
             {
-                "role": "assistant",
+                "role": "user",
                 "content": [
                     {
                         "type": "text",
@@ -130,19 +130,19 @@ def imaging(window_title=None, additional_context=None, x=None, y=None, screensh
     return analysis_result
 
 
-if __name__ == "__main__":
-    app_name = "Firefox"
-    coordinates = {'x': 132, 'y': 458}
-    screenshot_size = (300, 300)
-    x = coordinates['x']
-    y = coordinates['y']
-    pyautogui.moveTo(x, y, 0.5, pyautogui.easeOutQuad)
-    single_step = "click on the 'Add a comment...' text input area"
-
-    # Call imaging with the additional_context parameter if needed and the size parameter
-    element_analysis = (
-        f"You are an AI Agent called Element Analyzer that receives a screenshot of the element and analyzes it to check if the mouse is in the correct position to click the element to interact with.\n"
-        f"Element to interact with: {single_step}\nRespond only with \"Yes\" or \"No\"."
-    )
-    analysis_result = imaging(window_title=app_name, additional_context=element_analysis, x=coordinates['x'], y=coordinates['y'], screenshot_size=screenshot_size)
-    print(analysis_result)
+# if __name__ == "__main__":
+#     app_name = "Firefox"
+#     coordinates = {'x': 132, 'y': 458}
+#     screenshot_size = (300, 300)
+#     x = coordinates['x']
+#     y = coordinates['y']
+#     pyautogui.moveTo(x, y, 0.5, pyautogui.easeOutQuad)
+#     single_step = "click on the 'Add a comment...' text input area"
+#
+#     # Call imaging with the additional_context parameter if needed and the size parameter
+#     element_analysis = (
+#         f"You are an AI Agent called Element Analyzer that receives a screenshot of the element and analyzes it to check if the mouse is in the correct position to click the element to interact with.\n"
+#         f"Element to interact with: {single_step}\nRespond only with \"Yes\" or \"No\"."
+#     )
+#     analysis_result = imaging(window_title=app_name, additional_context=element_analysis, x=coordinates['x'], y=coordinates['y'], screenshot_size=screenshot_size)
+#     print(analysis_result)

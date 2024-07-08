@@ -7,9 +7,12 @@ from PIL import Image
 import pyautogui
 import io
 import os
+from dotenv import load_dotenv
+import json
+import time
+load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
-
+openai_api_key = os.getenv("OPENAI_API_KEY")
 
 def get_focused_window_details():
     try:
@@ -75,37 +78,99 @@ def get_screen_image(window_title=None, additional_context=None, x=None, y=None,
 
     # Convert the bytes to a base64-encoded image and analyze
     base64_image = encode_image(bytes_data)
+    time.sleep(3)
     return base64_image
 
 
 def analyze_screenshot(screenshot, prompt):
+    try:
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {openai_api_key}"
+        }
 
-    headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {os.getenv('OPENAI_API_KEY')}"
-    }
-
-    payload = {
-        "model": "gpt-4o",
-        "messages": [
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": f"{prompt}"
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/png;base64,{screenshot}"
+        payload = {
+            "model": "gpt-4o",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": f"{prompt}"
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:image/png;base64,{screenshot}"
+                            }
                         }
-                    }
-                ]
-            }
-        ],
-        "max_tokens": 300
-    }
+                    ]
+                }
+            ],
+            "max_tokens": 300
+        }
 
-    response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-    return response.json()['choices'][0]['message']['content']
+        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+        print("analyze_screenshot response.json()", response.json())
+        return response.json()['choices'][0]['message']['content']
+    except Exception as ex:
+        print(ex)
+        raise ex
+
+
+def cleanup_json(step_analysis):
+    print("cleanup_json step_analysis\n" , step_analysis)
+    # if step_analysis:
+    #     try:
+    #         step_analysis = step_analysis.strip()
+    #         if """```json""" in step_analysis:
+    #             # Removing the leading ```json\n
+    #             step_analysis = step_analysis.split("""```json""")[1].strip()
+    #             # Find the last occurrence of ``` and slice the string up to that point
+    #             last_triple_tick = step_analysis.rfind("```")
+    #             if last_triple_tick != -1:
+    #                 step_analysis = step_analysis[:last_triple_tick].strip()
+    #             step_analysis_cleaned = step_analysis
+    #             instructions = json.loads(step_analysis_cleaned)
+    #         else:
+    #             instructions = json.loads(step_analysis)
+    #             instructions['actions'] = instructions.pop('actions')
+    #     except json.JSONDecodeError as e:
+    #         # speaker(f"ERROR: Invalid JSON data provided: {e}")
+    #         time.sleep(15)
+    #         raise e
+    #     if 'actions' in instructions:
+    #         action_list = instructions['actions']
+    #     else:
+    #         action_list = [instructions]
+    #         instructions = {"actions": action_list}
+
+    # TODO: updated code
+    if """```json""" in step_analysis:
+        # Removing the leading ```json\n
+        step_analysis = step_analysis.split("""```json""")[1].strip()
+        step_analysis = step_analysis.replace('```', '').strip()
+        action_list = json.loads(step_analysis)
+        instructions = {"actions": action_list}
+    else:
+        action_list = json.loads(step_analysis)
+        instructions = {"actions": action_list}
+
+    return action_list, instructions
+
+# def cleanup_json(step_analysis):
+#     # Check if the input contains ```json to signify JSON content
+#     if "```json" in step_analysis:
+#         start_index = step_analysis.find("```json") + len("```json")
+#         json_content = step_analysis[start_index:].strip()
+#     else:
+#         json_content = step_analysis.strip()
+#
+#     if "```" in json_content:
+#         json_content = json_content[:json_content.find("```")].strip()
+#
+#     action_list = json.loads(json_content) if json_content else []
+#     instructions = {"actions": action_list}
+#
+#     return action_list, instructions

@@ -67,4 +67,66 @@ class MarvisTasks():
             agent=agent
         )
 
+    def steps_execution_task(self, agent, action, step_description, original_goal, assistant_goal, app_name, instructions, previous_step=None, next_step=None, assistant_identity=""):
+        return Task(
+            description=dedent(
+                f"""An efficient assistant who has access to a tool that can execute a given action 'execute_task'. You use the tool to perform the step provided.
 
+                **Parameters**: 
+                - step_action: {action}
+                - step_description: {step_description}
+                - original_goal: {original_goal}
+                - assistant_goal: {assistant_goal}
+                - app_name: {app_name}
+                - instructions: {instructions}
+                - previous_step: {previous_step}
+                - next_step: {next_step}
+
+                **Note**:
+                Execute each task and use tools 'validate_task_execution' to validate if the task executed successfully, in case of failure use the tool 'step_enhancer' to get possible next step on basis of current system status. You’ll get 100$ for complete execution.
+                """),
+            expected_output="Execution status of the step.",
+            agent=agent
+        )
+
+    def execution_validator(self, agent, action, step_description, original_goal, assistant_goal, app_name, instructions, previous_step=None, next_step=None, assistant_identity=""):
+        return Task(
+            description=dedent(
+                f"""An efficient assistant who has access to a tool 'validate_task_execution' that can analyze if a step has successfully performed or not.
+
+                **Parameters**: 
+                - step_action: {action}
+                - step_description: {step_description}
+                - original_goal: {original_goal}
+                - assistant_goal: {assistant_goal}
+                - app_name: {app_name}
+                - instructions: {instructions}
+                - previous_step: {previous_step}
+                - next_step: {next_step}
+
+                **Note**:
+                Judge if a task was successfully achieved or not. You’ll get 100$ for complete execution.
+                """),
+            expected_output="Judgement if a task has been successfully performed or not.",
+            agent=agent
+        )
+
+    def step_enhancer_task(self, agent, step_action, step_description, original_goal, assistant_goal, app_name, instructions):
+        return Task(
+            description=dedent(
+                f"""An efficient windows expert who has access to a tool 'step_enhancer' that can enhance a step in case of its failed execution.
+
+                **Parameters**: 
+                - step_action: {step_action}
+                - step_description: {step_description}
+                - original_goal: {original_goal}
+                - assistant_goal: {assistant_goal}
+                - app_name: {app_name}
+                - instructions: {instructions}
+
+                **Note**:
+                Return the same step again if it is 100% correct and can be retried. You’ll get 100$ for complete execution.
+                """),
+            expected_output="Improved task that can be successfully done in current system state.",
+            agent=agent
+        )
