@@ -47,7 +47,8 @@ class MarvisAgents:
             allow_delegation=False,
             tools=[get_enhanced_goal_statements],
             LLM='gpt-4o',
-            verbose=True
+            verbose=True,
+            max_iter=3
         )
 
     def step_creator(self):
@@ -60,7 +61,8 @@ class MarvisAgents:
             tools=[create_step_tool],
             verbose=True,
             LLM='gpt-4o',
-            response_template=step_creator_case_example
+            response_template=step_creator_case_example,
+            max_iter=3
         )
 
     def steps_executer(self):
@@ -86,7 +88,7 @@ class MarvisAgents:
             tools=[validate_task_execution],
             verbose=True,
             LLM='gpt-4o',
-            max_iter=3
+            max_iter=1
         )
 
     def step_enhancer_agent(self):
@@ -99,5 +101,32 @@ class MarvisAgents:
             tools=[step_enhancer],
             verbose=True,
             LLM='gpt-4o',
+            max_iter=1
+        )
+
+    def response_summarizer(self):
+        return Agent(
+            role='Expert AI agent capable to summarize the text provided on the Windows 11 Operating System',
+            goal='Summarize provided text and return a concise blog-style response',
+            backstory=dedent(
+                """You are an AI capable of summarizing the text on the Windows 11 Operating System in 2-3 sentences."""),
+            allow_delegation=True,
+            # tools=[step_enhancer],
+            verbose=True,
+            LLM='gpt-4o',
+            max_iter=1
+        )
+
+    def step_creater_new(self):
+        return Agent(
+            role='AI capable to operate the Windows 11 Operating System',
+            goal='Call the tool provided and return the json output.',
+            backstory=dedent(
+                """You are an AI capable to operate the Windows 11 Operating System by using natural language.You will receive a description of the current state of the system and user's requirement."""),
+            allow_delegation=False,
+            tools=[create_step_tool],
+            verbose=True,
+            LLM='gpt-4o',
+            response_template=step_creator_case_example,
             max_iter=3
         )

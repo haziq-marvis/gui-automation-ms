@@ -17,6 +17,7 @@ def post_app_title(output: TaskOutput):
 
 class MarvisTasks():
     def get_app_title_task(self, agent, user_requirements, programs_list, installed_app_registry, focused_app=None):
+        print("calleddddddddddddddddd")
         return Task(
             description=dedent(f"""
             **Task**: Return relevant application to perform user_requirements
@@ -52,6 +53,7 @@ class MarvisTasks():
         )
 
     def detailed_steps_creator(self, agent, user_requirement, target_app, detailed_requirements):
+        print("user requirementtttttttttt", user_requirement)
         return Task(
             description=dedent(
                 f"""An efficient assistant who has access to a tool that can take detailed requirements 'create_step_tool', you use the tool to create detailed json with the natural language steps to achieve the goal.
@@ -61,7 +63,7 @@ class MarvisTasks():
             - target_app: {target_app}
             - detailed_requirements: {detailed_requirements}
             **Note**:
-            Share all the detailed steps back with me, do not remove anything. You ll get 100$ for complete answer.
+            Share all the detailed steps, back with me, do not remove anything. You ll get 100$ for complete answer.
             """),
             expected_output=f"Response from the utility form of a json to achieve the goal.The json must include only an act and its step, should be in the format created by the tool.",
             agent=agent
@@ -83,7 +85,7 @@ class MarvisTasks():
                 - next_step: {next_step}
 
                 **Note**:
-                Execute each task and use tools 'validate_task_execution' to validate if the task executed successfully, in case of failure use the tool 'step_enhancer' to get possible next step on basis of current system status. You’ll get 100$ for complete execution.
+                Execute each task carefully, retry in case of failure.
                 """),
             expected_output="Execution status of the step.",
             agent=agent
@@ -128,5 +130,39 @@ class MarvisTasks():
                 Return the same step again if it is 100% correct and can be retried. You’ll get 100$ for complete execution.
                 """),
             expected_output="Improved task that can be successfully done in current system state.",
+            agent=agent
+        )
+
+    def step_enhancer_task(self, agent, step_action, step_description, original_goal, assistant_goal, app_name, instructions):
+        return Task(
+            description=dedent(
+                f"""An efficient windows expert who has access to a tool 'step_enhancer' that can enhance a step in case of its failed execution.
+
+                **Parameters**: 
+                - step_action: {step_action}
+                - step_description: {step_description}
+                - original_goal: {original_goal}
+                - assistant_goal: {assistant_goal}
+                - app_name: {app_name}
+                - instructions: {instructions}
+
+                **Note**:
+                Return the same step again if it is 100% correct and can be retried. You’ll get 100$ for complete execution.
+                """),
+            expected_output="Improved task that can be successfully done in current system state.",
+            agent=agent
+        )
+
+    def text_summarizer(self, agent, text):
+        return Task(
+            description=dedent(
+                f"""An efficient assistant who can summarize the the provided text in blog text format for this provided text "{text}" in 2-3 sentences.
+
+            **Parameters**: 
+            - text: {text}
+            **Note**:
+            Provide a concise and understandable summary in 2-3 sentences.
+            """),
+            expected_output=f"Summarize this text statement: {text}.",
             agent=agent
         )

@@ -16,10 +16,12 @@ import pyautogui
 import sqlite3
 import psutil
 import random
+import keyboard
 import json
 import time
 import re
 import warnings
+import pyperclip
 warnings.simplefilter("ignore", UserWarning)
 from pywinauto import Application
 low_data_mode = True
@@ -198,6 +200,7 @@ def find_element(single_step, app_name, original_goal, avoid_element="", assista
 
 
 def act(single_step, keep_in_mind="", dont_click=False, double_click=False, right_click=False, hold_key=None, app_name="", screen_analysis=False, original_goal="", modify_element=False, next_step=None, assistant_goal=None,  select_text=False, copy_text=False,):
+
     # Trying to handle several actions inside the action:
     # action_analysis = [{"role": "assistant",
     #     "content": f"You are an AI Agent called Action Analyzer, that responds with the functions to execute to achieve the goal. Available functions:\n"
@@ -329,19 +332,39 @@ def act(single_step, keep_in_mind="", dont_click=False, double_click=False, righ
     #     #     pyautogui.keyUp('shift')
 
     if select_text:
-        if "headline" in single_step.lower():
-            pyautogui.click(x, y)
-            time.sleep(0.2)
-            pyautogui.doubleClick(x, y)
-        else:
-            pyautogui.click(x, y)
-            time.sleep(0.2)
-            pyautogui.keyDown('shift')
-            pyautogui.press(['down'] * 20)
-            pyautogui.keyUp('shift')
+        print("hiiii", select_text)
+        print("x",x)
+        print("y",y)
+        # x = 100
+        # pyautogui.center(x)
+        # pyautogui.click(x, y)
+        pyautogui.hotkey('ctrl', 'a')
+        print("select text", select_text)
+
+        # time.sleep(1)
+        # if "headline" in single_step.lower():
+        #     pyautogui.click(x, y)
+        #     time.sleep(0.2)
+        #     pyautogui.doubleClick(x, y)
+        # else:
+        #     pyautogui.click(x, y)
+        #     time.sleep(0.2)
+        #     pyautogui.keyDown('shift')
+        #     pyautogui.press(['down'] * 20)
+        #     pyautogui.keyUp('shift')
+        # time.sleep(2)
+        # keyboard.send('ctrl+a')
+        # time.sleep(5)
+        # # pyautogui.click(x, y)
+        # # time.sleep(0.2)
+        # x,y = pyautogui.size()
+        # print("x is",x,"y is ",y)
+        # pyautogui.doubleClick(x,y)
+
 
     if copy_text:
         pyautogui.hotkey('ctrl', 'c')
+
     return last_coordinates
 
 
@@ -805,7 +828,7 @@ def execute_task(step_action, step_description, original_goal, assistant_goal, a
         print(f"Selecting and copying text: {step_description}")
 
         act(single_step=f"{step_description}", app_name=app_name,
-            original_goal=original_goal, select_text=True, copy_text=True,)
+            original_goal=original_goal, select_text=True, copy_text=True)
         # New implementation:
         # pyautogui.keyDown('ctrl')
         # pyautogui.press('a')

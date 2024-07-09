@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 from crewai import Crew
 from utils.additional import cleanup_json
+import pyperclip
 
 load_dotenv()
 
@@ -23,10 +24,12 @@ def main():
     get_relevant_app_title_agent = agents.app_selector()  # TODO: assume its working fine
     get_enhanced_goal_agent = agents._goal_enhancer()
     step_creator_agent = agents.step_creator()
+    step_creator_agent_new = agents.step_creater_new()
     step_execution_agent = agents.steps_executer()
+    response_summarizer = agents.response_summarizer()
     # execution_validator_agent = agents.execution_validator()
     # step_enhancer_agent = agents.step_enhancer_agent()
-
+    #
     # define tasks
     focus_window = None
 
@@ -47,7 +50,6 @@ def main():
     )
     crew1.kickoff()
     target_app = get_app_title_task.output.raw_output
-    print("output  crew 1", target_app)
 
     enhanced_goal_task = tasks.enhanced_goal_task(
         get_enhanced_goal_agent,
@@ -116,9 +118,9 @@ def main():
     for i, step in enumerate(json_steps):
         previous_step = None
         if i > 0:
-            previous_step = json_steps[i-1]
+            previous_step = json_steps[i - 1]
         next_step = None
-        if i+1 < len(json_steps):
+        if i + 1 < len(json_steps):
             next_step = json_steps[i + 1]
         action = step.get(f"{executor}")
         step_description = step.get("step") or step.get("details", "No step description provided.")
@@ -143,6 +145,107 @@ def main():
         tasks=crew_tasks
     )
     crew4.kickoff()
+
+    print("copied text 545454", pyperclip.paste())
+    summarize_text_task = tasks.text_summarizer(
+        agent=response_summarizer,
+        text={"text": pyperclip.paste()}
+    )
+
+    crew5 = Crew(
+        agents=[
+            response_summarizer
+        ],
+        tasks=[summarize_text_task]
+    )
+    crew5.kickoff()
+    summarized_text = summarize_text_task.output.raw_output
+    summarized_text = summarized_text.replace("my best complete final answer to the task.", "")
+    print("crew5 summarized_goal:", summarized_text)
+    response_text = f"post this on twitter 'remember twitter is already logged-in'\n\n{summarized_text}"
+
+    if summarized_text is not None:
+
+        enhanced_goal_task_updated = tasks.enhanced_goal_task(
+            get_enhanced_goal_agent,
+            response_text,
+            target_app
+        )
+
+        crew6 = Crew(
+            agents=[
+                get_enhanced_goal_agent
+            ],
+            tasks=[
+                enhanced_goal_task_updated
+            ]
+        )
+
+        crew6.kickoff()
+        enhanced_goal_updated = enhanced_goal_task_updated.output.raw_output
+        print("raw input after again calling first crew6 is", enhanced_goal_updated)
+        step_creator_task_updated = tasks.detailed_steps_creator(
+            step_creator_agent,
+            response_text,
+            target_app,
+            enhanced_goal_updated
+        )
+
+        crew7 = Crew(
+            agents=[
+                step_creator_agent_new
+            ],
+            tasks=[
+                step_creator_task_updated
+            ]
+        )
+
+        crew7.kickoff()
+
+        steps_updated = step_creator_task_updated.output.raw_output
+        print("raw input after again calling first crew7 is", steps_updated)
+
+        time.sleep(3)
+        json_steps, instructions = cleanup_json(steps_updated)  # TODO: maybe do in post crew
+        print("after analysis", json_steps)
+
+        crew_tasks = []
+        executor = "act"
+
+        print("json_steps", json_steps)
+        print("instructions", instructions)
+
+        for i, step in enumerate(json_steps):
+            previous_step = None
+            if i > 0:
+                previous_step = json_steps[i - 1]
+            next_step = None
+            if i + 1 < len(json_steps):
+                next_step = json_steps[i + 1]
+            action = step.get(f"{executor}")
+            step_description = step.get("step") or step.get("details", "No step description provided.")
+
+            execution_task_updated = tasks.steps_execution_task(
+                step_execution_agent,
+                action=action,
+                step_description=step_description,
+                original_goal=response_text,
+                assistant_goal=enhanced_goal_updated,
+                app_name=target_app,
+                instructions=instructions,
+                previous_step=previous_step,
+                next_step=next_step
+            )
+            crew_tasks.append(execution_task_updated)
+
+        crew8 = Crew(
+            agents=[
+                step_execution_agent
+            ],
+            tasks=crew_tasks
+        )
+
+        crew8.kickoff()
 
 
 if __name__ == "__main__":
